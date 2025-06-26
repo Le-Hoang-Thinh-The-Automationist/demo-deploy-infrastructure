@@ -1,0 +1,1 @@
+terraform_directory: "{{ playbook_dir }}/../infrastructure-code/aws-services"

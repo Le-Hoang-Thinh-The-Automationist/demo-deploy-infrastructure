@@ -1,0 +1,12 @@
+---
+- name: Run Terraform to provision AWS infrastructure
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - role: aws-infra
+
+# - name: Install Rancher on EC2 instances
+#   hosts: rancher_nodes
+#   become: true
+#   roles:
+#     - role: k8s-installer

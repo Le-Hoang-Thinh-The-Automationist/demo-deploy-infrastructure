@@ -1,0 +1,16 @@
+---
+- name: Ensure Terraform is installed
+  ansible.builtin.command: terraform --version
+  register: terraform_check
+  changed_when: false
+  failed_when: terraform_check.rc != 0
+
+- name: Initialize Terraform
+  ansible.builtin.command: terraform init -upgrade
+  args:
+    chdir: "{{ terraform_directory }}"
+
+- name: Apply Terraform
+  ansible.builtin.command: terraform apply -auto-approve
+  args:
+    chdir: "{{ terraform_directory }}"
