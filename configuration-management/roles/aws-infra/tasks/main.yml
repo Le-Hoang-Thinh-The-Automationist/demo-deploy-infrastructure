@@ -14,3 +14,12 @@
   ansible.builtin.command: terraform apply -auto-approve
   args:
     chdir: "{{ terraform_directory }}"
+
+- name: Read Terraform's Output
+  ansible.builtin.shell: terraform output -json | jq -r '.public_ip_ec2.value'
+  args:
+    chdir: "{{ terraform_directory }}"
+  register: terraform_output
+
+- name: Extract the EC2's public IP for minikube configuration
+  command: "python3 {{ role_path }}/script/extract_output.py \"{{ terraform_output.stdout }}\""
