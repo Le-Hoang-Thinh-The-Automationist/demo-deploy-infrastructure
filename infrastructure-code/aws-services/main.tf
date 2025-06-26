@@ -26,3 +26,10 @@ module "ecr_repo" {
   encryption_type  = var.encryption_type
   tags             = var.tags
 }
+
+module "github_oidc" {
+  source     = "./modules/github_oidc_role"
+  role_name  = "github-actions-ci-role"
+  github_repo = "Le-Hoang-Thinh-The-Automationist/demo-github-action"
+  allowed_branch=  "*"
+}
