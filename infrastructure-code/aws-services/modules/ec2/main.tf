@@ -1,6 +1,6 @@
 resource "aws_key_pair" "generated" {
   key_name   = var.key_name
-  public_key = file("./secrets/demo-infra.pub")
+  public_key = file("${path.module}/secrets/demo-infra.pub")
 
   tags = merge(var.tags, {
     Name = var.key_name
@@ -12,9 +12,26 @@ resource "aws_security_group" "ec2_sg" {
   description = "Allow SSH"
   vpc_id      = var.vpc_id
 
+  # SSH to the EC2
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Get the HTTP
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Expose the Minikube'API server port
+  ingress {
+    from_port   = 32771
+    to_port     = 32771
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -39,8 +56,8 @@ resource "aws_instance" "minikube" {
   associate_public_ip_address = true
   key_name                    = aws_key_pair.generated.key_name
 
-    user_data = file("${path.module}/scripts/install-minikube.sh")
-  
+  user_data = file("${path.module}/scripts/install-minikube.sh")
+
   tags = merge(var.tags, {
     Name = "ec2-public-instance"
   })

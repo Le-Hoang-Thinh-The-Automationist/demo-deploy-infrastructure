@@ -17,3 +17,12 @@ module "ec2" {
   key_name      = var.key_name
   tags          = var.tags
 }
+
+module "ecr_repo" {
+  source           = "./modules/ecr"
+  ecr_repo_name    = var.ecr_repo_name
+  image_mutability = var.image_mutability
+  scan_on_push     = var.scan_on_push
+  encryption_type  = var.encryption_type
+  tags             = var.tags
+}

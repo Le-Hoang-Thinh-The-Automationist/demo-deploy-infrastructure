@@ -25,7 +25,7 @@ variable "public_subnet_cidr" {
 variable "availability_zone" {
   description = "AZ for the public subnet"
   type        = string
-  default     = "us-east-1a"
+  default     = "ap-southeast-1a"
 }
 
 variable "tags" {
@@ -33,23 +33,49 @@ variable "tags" {
   type        = map(string)
   default = {
     Environment = "dev"
-    Project     = "single-subnet"
+    Project     = "demo-github-action"
   }
 }
 
 variable "ami_id" {
   description = "AMI ID for EC2 instance"
   type        = string
+  default     = "ami-02c7683e4ca3ebf58"
 }
 
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro"
+  default     = "t3a.medium"
 }
 
 variable "key_name" {
   description = "Name of the SSH key pair"
   type        = string
-  default     = "value"
+  default     = "keypair_for_minikube"
+}
+
+# ECR's related parameters
+variable "ecr_repo_name" {
+  description = "Name of the ECR repository"
+  type        = string
+  default     = "demo-github-action"
+}
+
+variable "image_mutability" {
+  description = "Whether image tags are mutable or immutable"
+  type        = string
+  default     = "IMMUTABLE"
+}
+
+variable "scan_on_push" {
+  description = "Enable image scanning on push"
+  type        = bool
+  default     = true
+}
+
+variable "encryption_type" {
+  description = "Type of encryption to use"
+  type        = string
+  default     = "AES256"
 }
