@@ -56,6 +56,7 @@ resource "aws_instance" "minikube" {
   associate_public_ip_address = true
   key_name                    = aws_key_pair.generated.key_name
 
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   user_data = file("${path.module}/scripts/install-minikube.sh")
 
   tags = merge(var.tags, {

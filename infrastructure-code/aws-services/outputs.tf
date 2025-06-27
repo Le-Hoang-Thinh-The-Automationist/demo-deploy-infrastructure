@@ -9,3 +9,7 @@ output "ecr_url" {
 output "github_role_arn" {
   value = module.github_oidc.role_arn
 }
+
+output "aws_region" {
+  value = var.region
+}

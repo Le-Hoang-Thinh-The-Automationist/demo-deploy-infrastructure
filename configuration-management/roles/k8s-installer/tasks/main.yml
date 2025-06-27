@@ -1,0 +1,25 @@
+---
+- name: Install all neccessary dependencies on EC2
+  include_tasks: "{{ role_path }}/tasks/install_dependencies.yml"
+
+- name: Enable and start Docker service
+  # become: true
+  service:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Add ubuntu user to docker (and sudo) groups
+  ansible.builtin.user:
+    name: ubuntu
+    groups:
+      - docker
+      - sudo        
+    append: yes   
+    
+- name: Docker Login to ECR
+  ansible.builtin.shell: aws ecr get-login-password --region {{ aws_region }} | docker login --username AWS --password-stdin {{ aws_ecr_url }}
+
+- name: Start Minikube
+  become: no
+  command: minikube start

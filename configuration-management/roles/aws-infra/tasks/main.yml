@@ -10,6 +10,17 @@
   args:
     chdir: "{{ terraform_directory }}"
 
+- name: Refresh Terraform State to check for the drift
+  ansible.builtin.command: terraform refresh
+  args:
+    chdir: "{{ terraform_directory }}"
+
+# # This step should be disabled
+# - name: Destroy Terraform before apply the new
+#   ansible.builtin.command: terraform destroy -auto-approve
+#   args:
+#     chdir: "{{ terraform_directory }}"
+
 - name: Apply Terraform
   ansible.builtin.command: terraform apply -auto-approve
   args:

@@ -22,6 +22,12 @@ variable "public_subnet_cidr" {
   default     = "10.1.1.0/24"
 }
 
+variable "region" {
+  description = "Region that host the Application"
+  type        = string
+  default     = "ap-southeast-1"
+}
+
 variable "availability_zone" {
   description = "AZ for the public subnet"
   type        = string

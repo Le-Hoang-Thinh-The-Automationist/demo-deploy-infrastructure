@@ -3,12 +3,60 @@
   hosts: localhost
   gather_facts: false
   become: yes
+  vars:
+    terraform_directory: "{{ playbook_dir }}/../infrastructure-code/aws-services"
   roles:
     - dependencies
     - aws-infra
+  tasks:
+    - name: Read EC2's public IP
+      ansible.builtin.shell: terraform output -json | jq -r '.public_ip_ec2.value'
+      args:
+        chdir: "{{ terraform_directory }}"
+      register: public_ip_ec2
 
-# - name: Install Rancher on EC2 instances
-#   hosts: rancher_nodes
-#   become: true
-#   roles:
-#     - role: k8s-installer
+    - name: Read ECR's URL
+      ansible.builtin.shell: terraform output -json | jq -r '.ecr_url.value'
+      args:
+        chdir: "{{ terraform_directory }}"
+      register: ecr_url
+
+    - name: Read AWS Region
+      ansible.builtin.shell: terraform output -json | jq -r '.aws_region.value'
+      args:
+        chdir: "{{ terraform_directory }}"
+      register: aws_region      
+
+    - name: Set facts to pass between plays
+      set_fact:
+        aws_ecr_url: "{{ ecr_url.stdout }}"
+        aws_region: "{{ aws_region.stdout }}"
+        aws_cluster_ip: "{{ public_ip_ec2.stdout }}"
+
+    - name: Add Minikube host with its real IP
+      add_host:
+        name: minikube                   
+        ansible_host: "{{ public_ip_ec2.stdout }}"
+        ansible_user: ubuntu 
+        ansible_ssh_private_key_file: "{{ playbook_dir }}/secrets/demo-infra"            
+        groups: minikube                 
+
+- name: Install Minikube on EC2 instances
+  hosts: minikube
+  become: true
+  vars:
+    aws_region: "{{ hostvars['localhost']['aws_region'] }}"
+    aws_ecr_url: "{{ hostvars['localhost']['aws_ecr_url'] }}"
+  # Wait for the EC2 instance to finish initialization before installation
+  pre_tasks:
+    - name: Wait for SSH to come up on EC2
+      ansible.builtin.wait_for_connection:
+        # how long to wait for SSH to start answering (seconds)
+        timeout: 10
+        # how long to wait before the first try (seconds)
+        delay: 120
+        # per‐attempt SSH connect timeout
+        connect_timeout: 5
+
+  roles:
+    - k8s-installer

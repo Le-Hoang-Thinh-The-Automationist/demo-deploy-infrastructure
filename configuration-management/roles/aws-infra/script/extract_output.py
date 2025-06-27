@@ -8,7 +8,7 @@ def main():
     if len(sys.argv) != 2:
         sys.exit(1)
 
-    SSH_KEY_PATH=f"./demo-infra"
+    SSH_KEY_PATH=f"{os.path.dirname(__file__)}/../../../secrets/demo-infra"
     output_file=f"{os.path.dirname(__file__)}/../../../secrets/hosts.ini"
 
     # Simulate reading JSON data (you can load it from a file or command output)
