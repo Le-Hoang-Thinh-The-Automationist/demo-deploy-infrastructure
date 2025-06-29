@@ -22,4 +22,7 @@
 
 - name: Start Minikube
   become: no
-  command: minikube start
+  command: |
+    minikube start --listen-address=0.0.0.0 \
+                   --apiserver-ips={{ ec2_public_ip }} 
+

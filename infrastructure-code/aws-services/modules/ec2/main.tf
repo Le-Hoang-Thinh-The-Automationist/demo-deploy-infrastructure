@@ -27,11 +27,18 @@ resource "aws_security_group" "ec2_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  # Get the HTTPS
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   # Expose the Minikube'API server port
   ingress {
-    from_port   = 32771
-    to_port     = 32771
+    from_port   = 32700
+    to_port     = 32800
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

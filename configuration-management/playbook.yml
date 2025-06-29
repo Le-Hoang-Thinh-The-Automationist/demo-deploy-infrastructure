@@ -47,6 +47,7 @@
   vars:
     aws_region: "{{ hostvars['localhost']['aws_region'] }}"
     aws_ecr_url: "{{ hostvars['localhost']['aws_ecr_url'] }}"
+    ec2_public_ip:  "{{ hostvars['localhost']['aws_cluster_ip'] }}"
   # Wait for the EC2 instance to finish initialization before installation
   pre_tasks:
     - name: Wait for SSH to come up on EC2
@@ -54,9 +55,43 @@
         # how long to wait for SSH to start answering (seconds)
         timeout: 10
         # how long to wait before the first try (seconds)
-        delay: 120
+        delay: 180
         # per‐attempt SSH connect timeout
         connect_timeout: 5
 
   roles:
     - k8s-installer
+
+- name: Copy the Minikube configure to localhost
+  hosts: localhost
+  become: yes
+  vars:
+    # EC2 related info
+    ssh_private_key: "{{ playbook_dir }}/secrets/demo-infra"
+    ec2_username: ubuntu
+    ec2_public_ip:  "{{ hostvars['localhost']['aws_cluster_ip'] }}"
+    
+    # Minikube configuration
+    current_user: thinhphuongdong3
+    output_scp_package: "{{ playbook_dir }}/secrets"
+    template_k8s_config_yaml: "{{ playbook_dir }}/template/k8s-config.template"
+    output_k8s_config_yaml: "{{ playbook_dir }}/secrets/.remote_kube/config.yml"
+    default_k8s_api_port: "32771"
+
+  tasks:
+    - name: Copy the secret of minikube from the EC2 instance
+      command: |
+        sudo scp -i '{{ ssh_private_key }}' -r '{{ ec2_username }}@{{ ec2_public_ip }}:~/.minikube' '{{ output_scp_package }}'
+
+    - name: Create the custom .kube config
+      shell: |
+        export OUTPUT_MINIKUBE_PACKAGE='{{ output_scp_package }}/.minikube'
+        export KUBE_SERVER_API_ADDRESS={{ ec2_public_ip }}
+        export KUBE_SERVER_API_PORT={{ default_k8s_api_port }}
+
+        envsubst < {{ template_k8s_config_yaml }} > {{ output_k8s_config_yaml }}
+
+    - name: Change the owner of the minikube file and config to current user
+      shell: |
+        chown {{ current_user }} -R '{{ output_scp_package }}/.minikube'
+        chown {{ current_user }} {{ output_k8s_config_yaml }}

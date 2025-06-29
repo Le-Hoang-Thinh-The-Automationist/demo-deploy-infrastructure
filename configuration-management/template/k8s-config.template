@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Config
+preferences: {}
+
+clusters:
+  - name: minikube
+    cluster:
+      certificate-authority: ${OUTPUT_MINIKUBE_PACKAGE}/ca.crt
+      server: https://${KUBE_SERVER_API_ADDRESS}:${KUBE_SERVER_API_PORT}
+      extensions:
+        - name: cluster_info
+          extension:
+            last-update: Fri, 27 Jun 2025 07:21:24 UTC
+            provider: minikube.sigs.k8s.io
+            version: v1.36.0
+
+users:
+  - name: minikube
+    user:
+      client-key: ${OUTPUT_MINIKUBE_PACKAGE}/profiles/minikube/client.key
+      client-certificate: ${OUTPUT_MINIKUBE_PACKAGE}/profiles/minikube/client.crt
+
+contexts:
+  - name: minikube
+    context:
+      cluster: minikube
+      user: minikube
+      namespace: default
+      extensions:
+        - name: context_info
+          extension:
+            last-update: Fri, 27 Jun 2025 07:21:24 UTC
+            provider: minikube.sigs.k8s.io
+            version: v1.36.0
+
+current-context: minikube
